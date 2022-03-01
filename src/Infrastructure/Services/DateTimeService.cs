@@ -1,0 +1,8 @@
+﻿using ProjectX.Application.Common.Interfaces;
+
+namespace ProjectX.Infrastructure.Services;
+
+public class DateTimeService : IDateTime
+{
+    public DateTime Now => DateTime.Now;
+}

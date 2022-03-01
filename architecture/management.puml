@@ -1,0 +1,201 @@
+@startuml
+
+entity Store {
+  + id (PK)
+  --
+  # rootUserId (FK)
+  --
+  name
+  isActive  
+}
+
+entity Outlet  {
+  + id (PK)
+  --
+  # storeId (FK)
+  --
+  name
+  shortDescription
+  description
+  logo
+  media
+  isActive
+  isMasterOutlet
+  phoneNumber
+  address
+}
+
+
+' Categories and items
+class Item {
+  name
+  image
+  description
+}
+
+class DisplayableItem {
+  orderIndex
+  visibility (VISIBILITY)
+  visibleFrom
+  visibleUntil  
+}
+
+class PurchasableItem {
+  # taxCategoryId (FK)
+  --
+  price
+  isAvailable
+  currency
+}
+
+entity Category extends Item, DisplayableItem, PurchasableItem {
+  + id (PK)
+  --
+  # outletId (FK)  
+  # tagIds (FK)
+  --
+}
+
+entity Product extends Item, DisplayableItem, PurchasableItem {
+  + id (PK)
+  --
+  # tagIds (FK)
+  -- 
+}
+
+entity ProductVariant extends Item, DisplayableItem, PurchasableItem {
+  + id (PK)
+  --
+  # productId (FK)
+  # tagIds (FK)
+  --
+  isDefault
+}
+
+entity Addon extends Item, DisplayableItem, PurchasableItem {
+  + id (PK)
+  --
+}
+
+entity Product_Category {
+  # productId (FK)
+  # categoryId (FK)
+}
+
+entity Product_Addon {
+  # categoryId (FK)
+  # AddonId (FK)
+}
+
+entity ProductVariant_Addon {
+  # categoryId (FK)
+  # AddonId (FK)
+}
+
+entity Category_Addon {
+  # categoryId (FK)
+  # AddonId (FK)
+}
+
+entity Tag {
+  + id (PK)
+  --
+  name
+  icon
+}
+
+' Tax and legal
+entity TaxCategory {
+  + id (PK)
+  --
+  name
+  isIncluded
+  value
+  unit (TAX_CATEGORY_UNIT)
+  currency  
+}
+
+
+' User & Permissions
+
+package Auth0_RBAC {
+  class Role {
+  }
+
+  class Permission {}
+}
+
+entity User {
+  firstName
+  lastName
+  email
+  address
+  dob
+}
+
+entity User_Outlet {
+  # userId (FK)
+  # outletId (FK)
+  --
+  role
+}
+
+' Other 
+entity OpeningHour {
+  + id (PK)
+  --
+  # outletId (FK)
+  --
+  day
+  fromTime
+  toTime
+}
+
+' Relations
+Store --o{ Outlet
+User ||--|| Store
+User ---o{ User_Outlet
+User_Outlet }o--- Outlet
+Outlet -right-o{ Category
+Outlet-right-o{ OpeningHour
+Category ---o{ Product_Category
+Product_Category }o--- Product
+Product ---o{ ProductVariant
+User -left-o{ Role
+Role -right-o{ Permission
+Category -left-o{ Category_Addon
+Category_Addon }o--- Addon
+Product ---o{ Product_Addon
+Product_Addon }o-left- Addon
+ProductVariant -left-o{ ProductVariant_Addon
+ProductVariant_Addon }o-up- Addon
+Category }o-right-o{ Tag
+Product }o---o{ Tag
+ProductVariant }o---o{ Tag
+PurchasableItem ||-up-|| TaxCategory
+
+' Enums and Constants
+enum VISIBILITY {
+  hidden
+  visible
+  periodic
+}
+
+enum TAX_CATEGORY_UNIT {
+  percent
+  cents
+}
+
+enum PAYMENT_METHOD {
+  CASH
+  CARD_ON_COUNTER
+  CARD_ONLINE
+}
+
+enum User_ROLE {
+  ADMIN
+  MANAGER
+  STAFF
+  ...
+}
+@enduml
